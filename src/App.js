@@ -48,7 +48,7 @@ function App() {
     selectedPost.body = body;
     selectedPost.title = title;
 
-    const data = { id, title, body, userId: 1 };
+    const data = { id, title, body, userId: selectedPost.userId };
 
     fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
       method: "PUT",
