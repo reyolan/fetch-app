@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const Form = ({ userId, ...props }) => {
   const {
@@ -10,6 +10,7 @@ const Form = ({ userId, ...props }) => {
     setIsEditing,
     editPost,
     isEditingId,
+    resetInputs,
   } = props;
 
   const handleSubmit = e => {
@@ -33,6 +34,8 @@ const Form = ({ userId, ...props }) => {
       alert("Form Submitted");
       return response.json();
     });
+
+    resetInputs();
   };
 
   return (

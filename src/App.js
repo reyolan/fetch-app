@@ -30,6 +30,11 @@ function App() {
     fetchPosts();
   }, []);
 
+  const resetInputs = () => {
+    setBody("");
+    setTitle("");
+  };
+
   const deletePost = (e, id) => {
     e.preventDefault();
     fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
@@ -85,6 +90,7 @@ function App() {
         setIsEditing={setIsEditing}
         editPost={editPost}
         isEditingId={isEditingId}
+        resetInputs={resetInputs}
       />
       <br />
       <br />
