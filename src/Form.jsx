@@ -1,11 +1,25 @@
 import React, { useState } from "react";
 
-const Form = ({ userId, posts, setPosts }) => {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+const Form = ({ userId, ...props }) => {
+  const {
+    title,
+    setTitle,
+    body,
+    setBody,
+    isEditing,
+    setIsEditing,
+    editPost,
+    isEditingId,
+  } = props;
 
   const handleSubmit = e => {
     e.preventDefault();
+
+    if (isEditing) {
+      editPost(isEditingId);
+      setIsEditing(false);
+      return;
+    }
 
     const data = { userId, title, body };
     fetch("https://jsonplaceholder.typicode.com/posts", {
