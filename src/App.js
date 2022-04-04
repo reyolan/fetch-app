@@ -45,7 +45,6 @@ function App() {
 
   const editPost = id => {
     const selectedPost = posts.find(post => post.id === id);
-    console.log(selectedPost);
     selectedPost.body = body;
     selectedPost.title = title;
 
