@@ -1,120 +1,113 @@
-import React, { useEffect, useState } from "react";
-import Form from "./Form";
-import "./App.css";
+import React, { useState, useEffect } from 'react';
+
+import SearchBar from './components/SearchBar';
+import ProductCategory from './components/ProductCategory';
+import ProductRow from './components/ProductRow';
+
+const DATA_FROM_API = [
+  {
+    category: 'Sporting Goods',
+    price: '$49.99',
+    stocked: true,
+    name: 'Football',
+  },
+  {
+    category: 'Sporting Goods',
+    price: '$9.99',
+    stocked: true,
+    name: 'Baseball',
+  },
+  {
+    category: 'Sporting Goods',
+    price: '$29.99',
+    stocked: false,
+    name: 'Basketball',
+  },
+  {
+    category: 'Electronics',
+    price: '$99.99',
+    stocked: true,
+    name: 'iPod Touch',
+  },
+  {
+    category: 'Electronics',
+    price: '$399.99',
+    stocked: false,
+    name: 'iPhone 5',
+  },
+  { category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7' },
+];
+
+const transformedData = DATA_FROM_API.reduce((prev, curr, index) => {
+  if (index === 1) {
+    return [prev.category, prev, curr];
+  }
+
+  if (!!prev[index].category && prev[index].category !== curr.category) {
+    return [...prev, curr.category, curr];
+  }
+
+  return [...prev, curr];
+});
 
 function App() {
-  const [posts, setPosts] = useState([]);
-  const [hasError, setHasError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingId, setIsEditingId] = useState(0);
+  const [items, setItems] = useState([]);
+  const [inStock, setInStock] = useState(false);
+  const [keyword, setKeyword] = useState('');
+
+  const handleInStockStatusChange = value => {
+    setInStock(value);
+  };
+
+  const handleSearchSubmit = value => {
+    setKeyword(value);
+  };
 
   useEffect(() => {
-    const fetchPosts = () => {
-      fetch("https://jsonplaceholder.typicode.com/posts")
-        .then(response => response.json())
-        .then(result => {
-          setPosts(result);
-          setIsLoading(false);
-        })
-        .catch(error => {
-          setHasError(true);
-          setIsLoading(false);
-          setErrorMessage(error.message);
-        });
-    };
-
-    fetchPosts();
+    setItems(transformedData);
   }, []);
 
-  const resetInputs = () => {
-    setBody("");
-    setTitle("");
-  };
+  useEffect(() => {
+    if (inStock) {
+      const filteredItems = transformedData.filter(
+        item => item.stocked || typeof item === 'string'
+      );
+      setItems(filteredItems);
+    } else {
+      setItems(transformedData);
+    }
+  }, [inStock]);
 
-  const deletePost = (e, id) => {
-    e.preventDefault();
-    fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
-      method: "DELETE",
-    });
-    setPosts(posts.filter(post => post.id !== id));
-  };
-
-  const editPost = id => {
-    const selectedPost = posts.find(post => post.id === id);
-    selectedPost.body = body;
-    selectedPost.title = title;
-
-    const data = { id, title, body, userId: selectedPost.userId };
-
-    fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    })
-      .then(response => response.json())
-      .then(json => console.log(json));
-
-    const updatedPosts = posts.map(post =>
-      post.id === id ? { ...selectedPost } : post
-    );
-
-    setPosts(updatedPosts);
-  };
-
-  const handleEdit = (e, id) => {
-    e.preventDefault();
-    setIsEditingId(id);
-    setIsEditing(true);
-    const selectedPost = posts.find(post => post.id === id);
-    setTitle(selectedPost.title);
-    setBody(selectedPost.body);
-  };
+  useEffect(() => {
+    if (keyword) {
+      const filteredItems = transformedData.filter(item => {
+        return (
+          item?.name?.toLowerCase().includes(keyword.toLowerCase()) ||
+          typeof item === 'string'
+        );
+      });
+      setItems(filteredItems);
+    } else {
+      setItems(transformedData);
+    }
+  }, [keyword]);
 
   return (
-    <div className="App">
-      <h1>Random Users</h1>
-      <Form
-        userId={1}
-        title={title}
-        setTitle={setTitle}
-        body={body}
-        setBody={setBody}
-        isEditing={isEditing}
-        setIsEditing={setIsEditing}
-        editPost={editPost}
-        isEditingId={isEditingId}
-        resetInputs={resetInputs}
+    <div className='App'>
+      <SearchBar
+        inStock={inStock}
+        onToggle={handleInStockStatusChange}
+        onSearch={handleSearchSubmit}
       />
-      <br />
-      <br />
-      {hasError ? <p>{errorMessage}</p> : null}
-      {!isLoading ? (
-        <ul>
-          {posts.map(({ id, title, body }) => (
-            <>
-              <li key={id}>
-                <p>Title: {title}</p>
-                <p>Body: {body}</p>
-                <button type="button" onClick={e => handleEdit(e, id)}>
-                  Edit
-                </button>
-                <button type="button" onClick={e => deletePost(e, id)}>
-                  Delete
-                </button>
-              </li>
-              <hr />
-            </>
-          ))}
-        </ul>
-      ) : (
-        <h3>loading...</h3>
-      )}
+      <div className='product-table'>
+        {items.map(item => {
+          return typeof item === 'string' ? (
+            <ProductCategory key={item}>{item}</ProductCategory>
+          ) : (
+            <ProductRow key={item.name} item={item} />
+          );
+        })}
+      </div>
     </div>
   );
 }

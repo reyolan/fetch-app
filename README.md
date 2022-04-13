@@ -1,4 +1,4 @@
-## Fetch app
+## Problem
 
-using [https://jsonplaceholder.typicode.com/guide/](https://jsonplaceholder.typicode.com/guide/)
-
+- try to fix the search of items
+- try to fix the search of items when clicking the in stock checkbox
