@@ -48,7 +48,7 @@ const DATA_FROM_API = [
 //   }
 
 //   return [...acc, curr];
-// }, []);
+// });
 
 // REDUCE PRACTICE
 const transformedData = DATA_FROM_API.reduce(
