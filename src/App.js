@@ -38,17 +38,27 @@ const DATA_FROM_API = [
   { category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7' },
 ];
 
-const transformedData = DATA_FROM_API.reduce((prev, curr, index) => {
-  if (index === 1) {
-    return [prev.category, prev, curr];
-  }
+// const transformedData = DATA_FROM_API.reduce((acc, curr, index) => {
+//   if (index === 1) {
+//     return [acc.category, acc, curr];
+//   }
 
-  if (!!prev[index].category && prev[index].category !== curr.category) {
-    return [...prev, curr.category, curr];
-  }
+//   if (!!acc[index].category && acc[index].category !== curr.category) {
+//     return [...acc, curr.category, curr];
+//   }
 
-  return [...prev, curr];
-});
+//   return [...acc, curr];
+// }, []);
+
+// REDUCE PRACTICE
+const transformedData = DATA_FROM_API.reduce(
+  (acc, currentData, index, dataArr) => {
+    return !acc.length || currentData?.category !== dataArr[index - 1]?.category
+      ? [...acc, currentData.category, currentData]
+      : [...acc, currentData];
+  },
+  []
+);
 
 function App() {
   const [items, setItems] = useState([]);
@@ -68,29 +78,25 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (inStock) {
-      const filteredItems = transformedData.filter(
-        item => item.stocked || typeof item === 'string'
-      );
-      setItems(filteredItems);
-    } else {
+    if (!keyword && !inStock) {
       setItems(transformedData);
+      return;
     }
-  }, [inStock]);
 
-  useEffect(() => {
-    if (keyword) {
-      const filteredItems = transformedData.filter(item => {
-        return (
-          item?.name?.toLowerCase().includes(keyword.toLowerCase()) ||
-          typeof item === 'string'
-        );
-      });
-      setItems(filteredItems);
-    } else {
-      setItems(transformedData);
-    }
-  }, [keyword]);
+    const filteredItems = transformedData.reduceRight((acc, currentItem) => {
+      if (
+        acc[0]?.category === currentItem ||
+        (currentItem.name?.toLowerCase().includes(keyword.toLowerCase()) &&
+          (!inStock || currentItem.stocked === inStock))
+      ) {
+        return [currentItem, ...acc];
+      }
+
+      return acc;
+    }, []);
+
+    setItems(filteredItems);
+  }, [keyword, inStock]);
 
   return (
     <div className='App'>
